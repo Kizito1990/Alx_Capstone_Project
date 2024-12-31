@@ -3,16 +3,24 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Review, User, Like
 from .serializers import ReviewSerializer, UserSerializer, LikeSerializer
+from .permissions import IsOwnerOrReadOnly
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+    def get_permissions(self):
+        # Allow only authenticated users to modify users
+        if self.action in ['create', 'list']:
+            return [permissions.AllowAny()]
+        return super().get_permissions()
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['movie_title']
     ordering_fields = ['rating', 'created_at']

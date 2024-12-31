@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
     
    # Rview Serializers 
 class ReviewSerializer(serializers.ModelSerializer):
-    #user = serializers.ReadOnlyField(source='user.username')
+    user = serializers.ReadOnlyField(source='user.username')
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
 
     class Meta:
