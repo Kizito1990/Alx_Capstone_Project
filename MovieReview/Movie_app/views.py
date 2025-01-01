@@ -4,12 +4,13 @@ from rest_framework.response import Response
 from .models import Review, User, Like
 from .serializers import ReviewSerializer, UserSerializer, LikeSerializer
 from .permissions import IsOwnerOrReadOnly
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_permissions(self):
         # Allow only authenticated users to modify users
@@ -20,7 +21,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['movie_title']
     ordering_fields = ['rating', 'created_at']
@@ -33,7 +35,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 #Validating Likes, making sure a user cannot like posts twice
     def create(self, request, *args, **kwargs):
         review_id = request.data.get("review")
